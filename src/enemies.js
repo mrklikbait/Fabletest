@@ -349,7 +349,7 @@ export class Subjects {
     // stagger interrupts everything — stopping power you can feel
     if (s.staggerT > 0) {
       s.staggerT -= dt;
-      b.torso.rotation.x = (s.crawler ? 1.22 : 0) - 0.45 * (s.staggerT / E.staggerTime);
+      b.torso.rotation.x = (s.crawler ? 1.22 : 0) - 0.45 * Math.min(1, s.staggerT / E.staggerTime);
       return;
     }
 
