@@ -5,12 +5,14 @@ import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 
-const PORT = 4173;
+const PORT = 4200 + Math.floor(Math.random() * 500);
 mkdirSync('shots', { recursive: true });
 
 const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], {
   stdio: 'pipe',
+  detached: true,
 });
+process.on('exit', () => { try { process.kill(-server.pid, 'SIGKILL'); } catch (e) {} });
 await new Promise((res, rej) => {
   server.stdout.on('data', (d) => { if (String(d).includes('Local')) res(); });
   server.on('exit', () => rej(new Error('vite preview exited')));
@@ -99,3 +101,4 @@ if (errors.length) {
   process.exit(1);
 }
 console.log('SMOKE OK');
+process.exit(0);

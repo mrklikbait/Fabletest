@@ -60,6 +60,8 @@ const stage = async (idx) => {
     s.pos.set(21.75, 0, 26.25);
     s.yaw = Math.PI;
     s.staggerT = 30;
+    s.body.root.rotation.y = s.yaw;
+    s.body.root.updateMatrixWorld(true); // raycasts read matrixWorld directly; don't race the render
   }, idx);
   await page.waitForTimeout(250);
 };
@@ -69,6 +71,7 @@ const shootPart = async (idx, part) => {
   await page.evaluate(([i, p]) => {
     const g = window.__game;
     const s = g.enemies.list[i];
+    s.body.root.updateMatrixWorld(true);
     const target = g.player.pos.clone();
     s.body.meshes[p].getWorldPosition(target);
     const { pos } = g.weapons.muzzleWorld();

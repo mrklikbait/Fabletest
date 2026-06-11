@@ -1,3 +1,25 @@
+// Keys are matched by physical KeyboardEvent.code so WASD stays put on any
+// layout. Some environments (remote-desktop viewers, VMs, virtual keyboards)
+// deliver empty or "Unidentified" codes while the mouse works fine — for
+// those, fall back to deriving a code from e.key.
+function codeFromKey(key) {
+  if (!key) return null;
+  if (key === ' ' || key === 'Spacebar') return 'Space';
+  if (key.length === 1) {
+    const u = key.toUpperCase();
+    if (u >= 'A' && u <= 'Z') return 'Key' + u;
+    if (u >= '0' && u <= '9') return 'Digit' + u;
+    return null;
+  }
+  const named = { Shift: 'ShiftLeft', Control: 'ControlLeft', Alt: 'AltLeft', Esc: 'Escape' };
+  return named[key] || key; // ArrowUp, Tab, Escape, ... pass through
+}
+
+function normCode(e) {
+  if (e.code && e.code !== 'Unidentified') return e.code;
+  return codeFromKey(e.key);
+}
+
 export class Input {
   constructor() {
     this.keys = new Set();
@@ -8,14 +30,21 @@ export class Input {
     this.mouseRDown = false;
     this.mouseJustDown = false;
     this.enabled = false;
+    this.lastKeyEvent = null; // diagnostics
 
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
-      this.keys.add(e.code);
-      this.justPressed.add(e.code);
-      if (['Space', 'Tab'].includes(e.code)) e.preventDefault();
+      const code = normCode(e);
+      this.lastKeyEvent = { code: e.code, key: e.key, used: code };
+      if (!code) return;
+      this.keys.add(code);
+      this.justPressed.add(code);
+      if (code === 'Space' || code === 'Tab') e.preventDefault();
     });
-    window.addEventListener('keyup', (e) => this.keys.delete(e.code));
+    window.addEventListener('keyup', (e) => {
+      const code = normCode(e);
+      if (code) this.keys.delete(code);
+    });
     window.addEventListener('mousemove', (e) => {
       if (!this.enabled) return;
       this.mouseDX += e.movementX;

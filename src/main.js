@@ -15,6 +15,7 @@ class Game {
   constructor() {
     this.renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(1);
+    this.renderer.domElement.tabIndex = -1; // focusable, so keystrokes always land on the page
     document.body.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
@@ -49,7 +50,10 @@ class Game {
     window.__game = this; // debug/test handle
   }
 
-  lock() { this.renderer.domElement.requestPointerLock(); }
+  lock() {
+    this.renderer.domElement.focus();
+    this.renderer.domElement.requestPointerLock();
+  }
 
   begin() {
     this.audio.init();

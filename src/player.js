@@ -65,10 +65,10 @@ export class Player {
 
     // move
     let ix = 0, iz = 0;
-    if (input.held('KeyW')) iz -= 1;
-    if (input.held('KeyS')) iz += 1;
-    if (input.held('KeyA')) ix -= 1;
-    if (input.held('KeyD')) ix += 1;
+    if (input.held('KeyW') || input.held('ArrowUp')) iz -= 1;
+    if (input.held('KeyS') || input.held('ArrowDown')) iz += 1;
+    if (input.held('KeyA') || input.held('ArrowLeft')) ix -= 1;
+    if (input.held('KeyD') || input.held('ArrowRight')) ix += 1;
     const wish = new THREE.Vector3(ix, 0, iz);
     this.moving = wish.lengthSq() > 0 && this.bandaging <= 0;
     this.running = this.moving && input.held('ShiftLeft') && !this.crouched;
