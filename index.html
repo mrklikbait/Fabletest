@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PRESS CHECK</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+    canvas { display: block; }
+    #overlay {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.92); z-index: 10;
+    }
+    #card {
+      max-width: 760px; padding: 32px 40px; color: #b8b2a4;
+      font-family: 'Courier New', monospace; text-align: center;
+      border: 1px solid #2c2a24; background: #0a0908;
+    }
+    #card h1 { font-size: 42px; letter-spacing: 14px; margin: 8px 0 4px; color: #d8d2c0; font-weight: normal; }
+    #card h1.red { color: #7a1212; }
+    #card .tag { font-style: italic; color: #6e6757; margin-top: 0; }
+    #card .body { line-height: 1.5; }
+    #card .dim { color: #6e6757; font-size: 13px; }
+    #card .cols { display: flex; gap: 36px; justify-content: center; text-align: left; font-size: 13px; line-height: 1.7; margin: 18px 0; }
+    #card .cols b { color: #d8d2c0; letter-spacing: 3px; }
+    #card button {
+      margin-top: 14px; padding: 12px 34px; background: #1a1812; color: #d8d2c0;
+      border: 1px solid #4a4434; font-family: inherit; font-size: 15px; letter-spacing: 4px; cursor: pointer;
+    }
+    #card button:hover { background: #2a2618; }
+    #whisper {
+      position: fixed; left: 0; right: 0; bottom: 11%; text-align: center; pointer-events: none;
+      font-family: Georgia, serif; font-style: italic; font-size: 19px; color: #c9c2ae;
+      text-shadow: 0 0 8px #000, 0 2px 4px #000; opacity: 0; z-index: 5;
+    }
+    #prompt {
+      position: fixed; left: 0; right: 0; bottom: 5%; text-align: center; pointer-events: none;
+      font-family: 'Courier New', monospace; font-size: 14px; letter-spacing: 2px; color: #8a8472;
+      text-shadow: 0 0 6px #000; z-index: 5;
+    }
+  </style>
+</head>
+<body>
+  <div id="overlay"><div id="card"></div></div>
+  <div id="whisper"></div>
+  <div id="prompt"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
