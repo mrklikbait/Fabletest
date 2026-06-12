@@ -71,7 +71,8 @@ class Game {
       event: (n) => this.ui.event(n),
     };
 
-    this.showKeys = true; // input monitor starts visible; I toggles it
+    this.showKeys = false; // I toggles the input monitor; H the controls list
+    this.showHelp = false;
     this.player = new Player(this.camera, this.level, this.audio, {
       noise,
       onBandaged: () => this.ui.whisper("dressed. it'll hold."),
@@ -107,6 +108,8 @@ class Game {
     this.state = 'dying';
     this.fx.fadeOut(0x180202);
     this.ui.prompt('');
+    this.ui.setHelp(false);
+    this.ui.setKeys('');
     setTimeout(() => {
       document.exitPointerLock();
       this.ui.showDead(this.stats, () => location.reload());
@@ -118,6 +121,8 @@ class Game {
     this.state = 'won';
     this.fx.fadeOut(0x0a0c10);
     this.ui.prompt('');
+    this.ui.setHelp(false);
+    this.ui.setKeys('');
     setTimeout(() => {
       document.exitPointerLock();
       this.ui.showWin(this.stats, () => location.reload());
@@ -230,7 +235,11 @@ class Game {
         else if (this.player.startBandage()) this.ui.whisper('wrapping — stay still.');
       }
 
-      // input monitor (I to toggle)
+      // controls overlay (H) and input monitor (I)
+      if (this.input.pressed('KeyH')) {
+        this.showHelp = !this.showHelp;
+        this.ui.setHelp(this.showHelp);
+      }
       if (this.input.pressed('KeyI')) this.showKeys = !this.showKeys;
       if (this.showKeys) {
         const i = this.input;

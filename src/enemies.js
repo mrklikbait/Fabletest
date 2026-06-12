@@ -181,7 +181,11 @@ export class Subjects {
     s.mode = 'dead';
     s.fallT = 0;
     this.ctx.stats.kills++;
-    if (s.voice) s.voice.die();
+    if (s.voice) {
+      s.voice.die();
+      const v = s.voice;
+      setTimeout(() => v.dispose(), 5000); // groan and body-fall play out, then free the HRTF panner
+    }
   }
 
   _aggro(s) {

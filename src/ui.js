@@ -1,6 +1,28 @@
 // All persistent HUD is refused on principle. What remains: an inner voice
 // (whispers), contextual prompts, and full-screen state cards.
 
+const CONTROLS_HTML = `
+      <div class="cols">
+        <div>
+          <b>MOVE</b><br>
+          WASD walk &middot; SHIFT run (loud)<br>
+          C crouch (quiet) &middot; Q / E lean<br>
+          F interact &middot; V kick<br>
+          T weapon light &middot; X field dressing
+        </div>
+        <div>
+          <b>GUN</b><br>
+          LMB fire &middot; RMB sights &middot; SPACE hold breath<br>
+          R tap — reload, keep the mag<br>
+          R double-tap — fast, mag hits the floor<br>
+          R hold — press check &middot; R clears a stoppage<br>
+          G hold — top off mags / feed shells<br>
+          M hold — clean the action (needs kit)<br>
+          1 / 2 — pistol / shotgun
+        </div>
+      </div>
+      <p class="dim">H — this list &middot; I — input monitor &middot; ESC — pause</p>`;
+
 const EVENT_LINES = {
   open: 'team\'s gone. the fire-exit key is in unit 6 — north end. quiet feet.',
   firstkill: 'center mass worked. it usually does.',
@@ -20,6 +42,7 @@ export class UI {
     this.whisperEl = this.el('whisper');
     this.promptEl = this.el('prompt');
     this.keysEl = this.el('keys');
+    this.helpEl = this.el('help');
     this.queue = [];
     this.whisperT = 0;
     this.shown = new Set();
@@ -42,6 +65,11 @@ export class UI {
 
   setKeys(text) {
     if (this.keysEl.textContent !== (text || '')) this.keysEl.textContent = text || '';
+  }
+
+  setHelp(visible) {
+    if (visible && !this.helpEl.innerHTML) this.helpEl.innerHTML = `<b class="title">CONTROLS</b>${CONTROLS_HTML}`;
+    this.helpEl.style.display = visible ? 'block' : 'none';
   }
 
   update(dt) {
@@ -70,24 +98,7 @@ export class UI {
       <p class="tag">the gun works. your hands are the problem.</p>
       <p class="body">Your entry team is gone. The block is not empty.<br>
       Find the fire-exit key — unit 6, north end — and get out the lobby doors.</p>
-      <div class="cols">
-        <div>
-          <b>MOVE</b><br>
-          WASD walk &middot; SHIFT run (loud)<br>
-          C crouch (quiet) &middot; Q / E lean<br>
-          F interact &middot; V kick<br>
-          T weapon light
-        </div>
-        <div>
-          <b>GUN</b><br>
-          LMB fire &middot; RMB sights &middot; SPACE hold breath<br>
-          R tap — reload, keep the mag<br>
-          R double-tap — fast, mag hits the floor<br>
-          R hold — press check &middot; R clears a stoppage<br>
-          G hold — top off mags / feed shells<br>
-          M hold — clean the action (needs kit)
-        </div>
-      </div>
+      ${CONTROLS_HTML}
       <p class="body dim">No counters. No bars. The slide, the weight of the mag, and your own
       heartbeat are the instruments. Bullets go exactly where the barrel points — nothing else is promised.</p>
       <button id="go">ENTER THE BLOCK</button>
@@ -121,6 +132,7 @@ export class UI {
     this._show(`
       <h1>HOLDING</h1>
       <p class="body">the block waits.</p>
+      ${CONTROLS_HTML}
       <button id="go">RESUME</button>
     `);
     document.getElementById('go').addEventListener('click', onResume, { once: true });

@@ -81,6 +81,7 @@ node scripts/verify.mjs         # 14 end-to-end mechanic checks
 | M (hold) | clean the action (needs the kit, needs quiet) |
 | F / V / T / X | interact / kick / weapon light / field dressing |
 | 1 / 2 | pistol / shotgun |
+| H / I / Esc | controls overlay / input monitor / pause (also shows controls) |
 
 ## Stack
 

@@ -57,17 +57,13 @@ export class AudioMan {
 
   setListener(pos, fwd, up) {
     if (!this.started) return;
-    const l = this.ctx.listener, t = this.ctx.currentTime;
+    const l = this.ctx.listener;
+    // direct value writes: scheduling automation here every frame piles up
+    // timeline events that never expire and slowly starves the audio thread
     if (l.positionX) {
-      l.positionX.setTargetAtTime(pos.x, t, 0.02);
-      l.positionY.setTargetAtTime(pos.y, t, 0.02);
-      l.positionZ.setTargetAtTime(pos.z, t, 0.02);
-      l.forwardX.setTargetAtTime(fwd.x, t, 0.02);
-      l.forwardY.setTargetAtTime(fwd.y, t, 0.02);
-      l.forwardZ.setTargetAtTime(fwd.z, t, 0.02);
-      l.upX.setTargetAtTime(up.x, t, 0.02);
-      l.upY.setTargetAtTime(up.y, t, 0.02);
-      l.upZ.setTargetAtTime(up.z, t, 0.02);
+      l.positionX.value = pos.x; l.positionY.value = pos.y; l.positionZ.value = pos.z;
+      l.forwardX.value = fwd.x; l.forwardY.value = fwd.y; l.forwardZ.value = fwd.z;
+      l.upX.value = up.x; l.upY.value = up.y; l.upZ.value = up.z;
     } else {
       l.setPosition(pos.x, pos.y, pos.z);
       l.setOrientation(fwd.x, fwd.y, fwd.z, up.x, up.y, up.z);
@@ -85,11 +81,10 @@ export class AudioMan {
   }
 
   movePanner(p, pos) {
-    const t = this.ctx.currentTime;
     if (p.positionX) {
-      p.positionX.setTargetAtTime(pos.x, t, 0.03);
-      p.positionY.setTargetAtTime(pos.y, t, 0.03);
-      p.positionZ.setTargetAtTime(pos.z, t, 0.03);
+      p.positionX.value = pos.x;
+      p.positionY.value = pos.y;
+      p.positionZ.value = pos.z;
     } else p.setPosition(pos.x, pos.y, pos.z);
   }
 
@@ -209,7 +204,9 @@ export class AudioMan {
     if (this.breathNodes) {
       const base = holdingBreath ? 0.0 : (0.015 + 0.10 * fear);
       const v = base * Math.max(0, Math.sin(breathPhase));
-      this.breathNodes.gain.gain.setTargetAtTime(v, this.ctx.currentTime, 0.06);
+      // per-frame: write the value directly, never schedule
+      const g = this.breathNodes.gain.gain;
+      g.value = g.value + (v - g.value) * 0.25;
     }
   }
 
@@ -324,7 +321,13 @@ export class AudioMan {
     const g = this.ctx.createGain(); g.gain.value = 0;
     o.connect(f); f.connect(g); g.connect(p);
     o.start();
-    return { set: (on) => g.gain.setTargetAtTime(on ? 0.025 : 0, this.ctx.currentTime, 0.01) };
+    return {
+      set: (on) => {
+        const t = this.ctx.currentTime;
+        g.gain.cancelScheduledValues(t); // flicker toggles constantly; keep the timeline short
+        g.gain.setTargetAtTime(on ? 0.025 : 0, t, 0.01);
+      },
+    };
   }
 
   // ---- enemy voice ---------------------------------------------------
