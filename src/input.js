@@ -66,11 +66,18 @@ export class Input {
   held(code) { return this.keys.has(code); }
   pressed(code) { return this.justPressed.has(code); }
 
-  consumeFrame() {
+  // mouse deltas are consumed where they're used…
+  mouseDelta() {
     const d = { dx: this.mouseDX, dy: this.mouseDY };
     this.mouseDX = 0; this.mouseDY = 0;
+    return d;
+  }
+
+  // …but just-pressed flags live until the END of the frame, after every
+  // system has had its chance to read them. Clearing them at the top of
+  // the frame silently killed every tap action.
+  endFrame() {
     this.justPressed.clear();
     this.mouseJustDown = false;
-    return d;
   }
 }

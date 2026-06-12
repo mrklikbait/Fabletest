@@ -53,6 +53,22 @@ const isolate = async () => {
 };
 await isolate();
 
+// ---- real input paths: a trusted click must fire, a trusted tap must toggle.
+// (These would have caught the just-pressed flags being cleared before reads.)
+await page.mouse.move(640, 360);
+const shots0 = await page.evaluate(() => window.__game.stats.shots);
+await page.mouse.down(); await page.mouse.up();
+await page.waitForTimeout(500);
+let rr = await page.evaluate(() => ({ shots: window.__game.stats.shots }));
+check('real LMB click fires through the trigger path', rr.shots === shots0 + 1, `shots ${shots0}->${rr.shots}`);
+
+const light0 = await page.evaluate(() => window.__game.weapons.flashOn);
+await page.keyboard.press('KeyT');
+await page.waitForTimeout(400);
+rr = await page.evaluate(() => ({ on: window.__game.weapons.flashOn }));
+check('real keystroke toggles the weapon light', rr.on === !light0, `flashOn ${light0}->${rr.on}`);
+if (rr.on !== light0) { await page.keyboard.press('KeyT'); await page.waitForTimeout(300); }
+
 const stage = async (idx) => {
   await page.evaluate((i) => {
     const g = window.__game;
@@ -121,7 +137,7 @@ r = await page.evaluate(() => {
   return { mag: g.weapons.pistol.mag.r, items: g.level.items.filter((i) => !i.taken).length, state: g.state };
 });
 const itemsBefore = r.items;
-check('test rig clean (full starting mag, playing)', r.mag === 7 && r.state === 'play', `mag ${r.mag}, state ${r.state}`);
+check('one trigger round spent from the starting mag', r.mag === 6 && r.state === 'play', `mag ${r.mag}, state ${r.state}`);
 
 await page.evaluate(() => { window.__game.weapons.pistol.reload(false, 0.0); });
 await page.waitForFunction(() => window.__game.weapons.pistol.state === 'idle', null, { timeout: 20000 });

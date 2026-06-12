@@ -19,6 +19,7 @@ export class UI {
     this.card = this.el('card');
     this.whisperEl = this.el('whisper');
     this.promptEl = this.el('prompt');
+    this.keysEl = this.el('keys');
     this.queue = [];
     this.whisperT = 0;
     this.shown = new Set();
@@ -37,6 +38,10 @@ export class UI {
 
   prompt(text) {
     if (this.promptEl.textContent !== (text || '')) this.promptEl.textContent = text || '';
+  }
+
+  setKeys(text) {
+    if (this.keysEl.textContent !== (text || '')) this.keysEl.textContent = text || '';
   }
 
   update(dt) {

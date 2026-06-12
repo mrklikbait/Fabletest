@@ -71,8 +71,10 @@ class Game {
       event: (n) => this.ui.event(n),
     };
 
+    this.showKeys = true; // input monitor starts visible; I toggles it
     this.player = new Player(this.camera, this.level, this.audio, {
       noise,
+      onBandaged: () => this.ui.whisper("dressed. it'll hold."),
       onDamaged: () => {
         this.weapons.onPlayerDamaged();
         this.fear.spike(CFG.fear.spikeDamage);
@@ -205,9 +207,9 @@ class Game {
     this.last = now;
 
     this.ui.update(dt);
-    if (!this.built) return;
+    if (!this.built) { this.input.endFrame(); return; }
 
-    const mouse = this.input.consumeFrame();
+    const mouse = this.input.mouseDelta();
     const playing = this.state === 'play';
 
     if (playing) {
@@ -220,10 +222,25 @@ class Game {
       this.weapons.update(dt, this.input, calm);
       this.fear.update(dt, stim);
 
-      // bandage
+      // bandage — say why when it refuses, say so when it starts
       if (this.input.pressed('KeyX')) {
-        if (!this.player.startBandage() && this.player.bandages <= 0) this.ui.whisper('nothing left to wrap with.');
+        if (this.player.bandaging > 0) { /* already wrapping */ }
+        else if (this.player.bandages <= 0) this.ui.whisper('nothing left to wrap with.');
+        else if (this.player.hp >= CFG.player.hp) this.ui.whisper('not bleeding. save it.');
+        else if (this.player.startBandage()) this.ui.whisper('wrapping — stay still.');
       }
+
+      // input monitor (I to toggle)
+      if (this.input.pressed('KeyI')) this.showKeys = !this.showKeys;
+      if (this.showKeys) {
+        const i = this.input;
+        const last = i.lastKeyEvent ? `code "${i.lastKeyEvent.code}" key "${i.lastKeyEvent.key}" -> ${i.lastKeyEvent.used}` : '—';
+        this.ui.setKeys(
+          `held: ${[...i.keys].join(' ') || '—'}\n` +
+          `LMB ${i.mouseDown ? 'DOWN' : '—'}   RMB ${i.mouseRDown ? 'DOWN' : '—'}\n` +
+          `last key: ${last}   [I hides this]`,
+        );
+      } else this.ui.setKeys('');
 
       // interactions
       const inter = this.scanInteract();
@@ -255,6 +272,8 @@ class Game {
       this.fx.update(dt, this.fear.value, this.audio.beatPhase01 || 0);
       this.fx.render();
     }
+
+    this.input.endFrame(); // taps survive the whole frame, then clear
   }
 }
 

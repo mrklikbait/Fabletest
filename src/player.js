@@ -103,6 +103,7 @@ export class Player {
       this.bandaging -= dt;
       if (this.bandaging <= 0) {
         this.hp = Math.min(CFG.player.hp, this.hp + P.bandageHeal);
+        if (this.hooks.onBandaged) this.hooks.onBandaged();
       }
     }
 

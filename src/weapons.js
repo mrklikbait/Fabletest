@@ -392,8 +392,16 @@ export class WeaponSystem {
     }
 
     // --- trigger
-    if (input.mouseJustDown && this.switchT > 0.8 && this.compress < 0.6 && ctx.player.bandaging <= 0) {
-      if (this.current === 'pistol') this._firePistol();
+    if (input.mouseJustDown && this.switchT > 0.8 && ctx.player.bandaging <= 0) {
+      if (this.compress >= 0.6) {
+        // the wall is in the gun's way — make the refusal audible and legible
+        ctx.audio.dryFire();
+        const t = performance.now() / 1000;
+        if (!this._lastCompressNote || t - this._lastCompressNote > 4) {
+          this._lastCompressNote = t;
+          ctx.ui.whisper('muzzle against the wall — step back.');
+        }
+      } else if (this.current === 'pistol') this._firePistol();
       else this._fireShotgun();
     }
 
